@@ -1,0 +1,10 @@
+numpy
+parse
+matplotlib
+pandas
+geopandas
+Shapely --no-binary=Shapely
+netCDF4
+Pillow
+openpyxl
+xmltodict
