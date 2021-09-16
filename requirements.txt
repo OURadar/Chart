@@ -1,0 +1,9 @@
+numpy
+scipy
+notebook
+matplotlib
+netCDF4
+pandas
+geopandas
+Shapely --no-binary=Shapely
+xmltodict
