@@ -1,6 +1,6 @@
 # ARRC Radar Datasets
 
-This repository contains the data description and a few examples of reading the data into a Python and MATLAB space.
+This repository contains the data description and a few examples of reading the data into the Python space.
 
 ## Data Format
 
