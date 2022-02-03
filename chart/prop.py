@@ -4,9 +4,7 @@
 
 import os
 import re
-import argparse
 import textwrap
-import logging
 
 from .base import logger
 

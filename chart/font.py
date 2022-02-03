@@ -1,7 +1,6 @@
 # Font
 
 import os
-import sys
 import zipfile
 import matplotlib
 import matplotlib.font_manager

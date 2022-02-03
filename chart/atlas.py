@@ -422,7 +422,7 @@ class Layer:
                 if not self.viewbox.intersects(domain):
                     continue
                 if item.type == 'MultiPolygon':
-                    for subitem in item:
+                    for subitem in item.geoms:
                         subdomain = shapely.geometry.box(*subitem.bounds)
                         if not self.viewbox.intersects(subdomain):
                             continue
@@ -432,7 +432,7 @@ class Layer:
                     line = project(np.array(item.exterior.coords) * deg2rad)
                     self.lines.append(line)
                 elif item.type == 'MultiLineString':
-                    for subitem in item:
+                    for subitem in item.geoms:
                         subdomain = shapely.geometry.box(*subitem.bounds)
                         if not self.viewbox.intersects(subdomain):
                             continue

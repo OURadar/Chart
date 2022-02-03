@@ -1,10 +1,7 @@
 # Example dataset
 
 import os
-import sys
-import glob
 import zipfile
-import datetime
 import urllib.request
 import numpy as np
 
