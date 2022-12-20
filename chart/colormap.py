@@ -294,3 +294,4 @@ def zebra(n=256, b=4, m=0.5):
     sat = m + (1.0 - m) * 0.5 * (1.0 + saw / (b - 1.0))
     val = m + (1.0 - m) * 0.5 * (1.0 + np.cos(4.0 * b * np.pi * x / n))
     return [colorsys.hsv_to_rgb(h, s, v) for h, s, v in zip(hue, sat, val)]
+
