@@ -1,15 +1,14 @@
+from . import font
+from . import colormap
+from . import base
+import PIL
+import numpy as np
+import matplotlib.pyplot
 import matplotlib
 
-#matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 matplotlib.use('agg')
 
-import matplotlib.pyplot
-import numpy as np
-import PIL
-
-from . import base
-from . import colormap
-from . import font
 
 if matplotlib.__version__ < '3.0.2':
     base.logger.warning('This module requires matplotlib 3.0.2 or newer')
@@ -17,6 +16,7 @@ if matplotlib.__version__ < '3.0.2':
 matplotlib.pyplot.ioff()
 
 bgColor = (0, 0, 0)
+
 
 class Image:
     def updateQuads(self, a, r):
@@ -66,7 +66,8 @@ class Image:
         }
         with matplotlib.pyplot.rc_context(context_properties):
            # Create a new figure
-            w, h = self._figsize[0], self._figsize[1]    # Axis width & height in points
+            # Axis width & height in points
+            w, h = self._figsize[0], self._figsize[1]
             if w > h:
                 xmin = -maxrange * w / h + x
                 xmax = +maxrange * w / h + x
@@ -77,8 +78,10 @@ class Image:
                 xmax = +maxrange + x
                 ymin = -maxrange * h / w + y
                 ymax = +maxrange * h / w + y
-            figsize = np.array([w, h]) / self._dpi       # Figure size in inches
-            self.fig_dat = matplotlib.pyplot.figure(figsize=figsize, dpi=self._dpi, frameon=False)
+            # Figure size in inches
+            figsize = np.array([w, h]) / self._dpi
+            self.fig_dat = matplotlib.pyplot.figure(
+                figsize=figsize, dpi=self._dpi, frameon=False)
             self.dat = self.fig_dat.add_axes([0.0, 0.0, 1.0, 1.0])
             self.dat.set_xlim((xmin, xmax))
             self.dat.set_ylim((ymin, ymax))
@@ -90,11 +93,14 @@ class Image:
             self.dat.spines['left'].set_visible(False)
             self.dat.patch.set_facecolor(bgColor)
             self.fig_dat.canvas.draw()
-            base.logger.debug('extent = [{:.2f}, {:.2f}, {:.2f}, {:.2f}]'.format(xmin, xmax, ymin, ymax))
-            base.logger.debug('fig_dat size = {}'.format(self.fig_dat.get_size_inches() * self._dpi))
+            base.logger.debug(
+                'extent = [{:.2f}, {:.2f}, {:.2f}, {:.2f}]'.format(xmin, xmax, ymin, ymax))
+            base.logger.debug('fig_dat size = {}'.format(
+                self.fig_dat.get_size_inches() * self._dpi))
 
             # Create the overlay figure
-            self.fig_map = matplotlib.pyplot.figure(figsize=figsize, dpi=self._dpi, frameon=False)
+            self.fig_map = matplotlib.pyplot.figure(
+                figsize=figsize, dpi=self._dpi, frameon=False)
             self.map = self.fig_map.add_axes([0.0, 0.0, 1.0, 1.0])
             self.map.set_xlim((xmin, xmax))
             self.map.set_ylim((ymin, ymax))
@@ -107,12 +113,14 @@ class Image:
             self.map.patch.set_facecolor(bgColor)
             self.map.patch.set_alpha(0.0)
             self.fig_map.canvas.draw()
-            base.logger.debug('fig_map size = {}'.format(self.fig_map.get_size_inches() * self._dpi))
+            base.logger.debug('fig_map size = {}'.format(
+                self.fig_map.get_size_inches() * self._dpi))
             if overlay:
                 self.overlay = overlay
                 self.overlay.draw(self.map)
             self.fig_map.canvas.draw()
-            base.logger.debug('fig_map size = {}'.format(self.fig_map.get_size_inches() * self._dpi))
+            base.logger.debug('fig_map size = {}'.format(
+                self.fig_map.get_size_inches() * self._dpi))
 
             # Create the top-bar figure
             bw = w
@@ -120,7 +128,8 @@ class Image:
             self.bw = bw
             self.bh = bh
             figsize = np.array([bw, bh]) / self._dpi
-            self.fig_bar = matplotlib.pyplot.figure(figsize=figsize, dpi=self._dpi, frameon=False)
+            self.fig_bar = matplotlib.pyplot.figure(
+                figsize=figsize, dpi=self._dpi, frameon=False)
             self.bar = self.fig_bar.add_axes([0.0, 0.0, 1.0, 1.0])
             self.bar.set_xlim((0.0, bw))
             self.bar.set_ylim((0.0, bh))
@@ -135,7 +144,8 @@ class Image:
             self.bar.add_line(matplotlib.lines.Line2D([0, bw], [1.5, 1.5],
                                                       color='white', alpha=0.5, linewidth=self.featureScale))
             self.fig_bar.canvas.draw()
-            base.logger.debug('fig_bar size = {}'.format(self.fig_bar.get_size_inches() * self._dpi))
+            base.logger.debug('fig_bar size = {}'.format(
+                self.fig_bar.get_size_inches() * self._dpi))
 
             # Paint the gradient
             z = colormap.fleximap(20, [0.0, 0.50, 0.51, 1.0],
@@ -171,12 +181,16 @@ class Image:
 
             # Colorbar
             ct = self.fontproperties.title.get_size_in_points()
-            ch = np.round(16.0 * self.featureScale)                  # Colorbar height in points
-            pw = np.round(20.0 * self.featureScale)                  # Colorbar padding height in points
-            ph = np.round(12.0 * self.featureScale)                  # Colorbar padding width in points
+            # Colorbar height in points
+            ch = np.round(16.0 * self.featureScale)
+            # Colorbar padding height in points
+            pw = np.round(20.0 * self.featureScale)
+            # Colorbar padding width in points
+            ph = np.round(12.0 * self.featureScale)
             # Colorbar width in points
             cw = int(np.floor(self.featureScale * 2.0) * 256)
-            while (cw > w - self.featureScale * 100.0):              # Budget 100 points for the big symbol
+            # Budget 100 points for the big symbol
+            while (cw > w - self.featureScale * 100.0):
                 if w < 640:
                     cw -= 128
                 else:
@@ -207,16 +221,17 @@ class Image:
         # Initialize arrays of coordinates
         if values is None:
             if a is None:
-                a = np.arange(360, dtype=np.float) * np.pi / 180.0
+                a = np.arange(360, dtype=float) * np.pi / 180.0
             if r is None:
-                r = np.arange(1000, dtype=np.float) * 60.0
+                r = np.arange(1000, dtype=float) * 60.0
             self.updateQuads(a, r)
             self.values = None
         else:
             if a is None:
-                a = np.arange(values.shape[0], dtype=np.float) * 2.0 * np.pi / values.shape[0]
+                a = np.arange(
+                    values.shape[0], dtype=float) * 2.0 * np.pi / values.shape[0]
             if r is None:
-                r = np.arange(values.shape[1], dtype=np.float) * 0.06
+                r = np.arange(values.shape[1], dtype=float) * 0.06
             self.updateQuads(a, r)
             self.set_data(values, style=style, symbol=symbol, title=title)
         self.fig_bar.canvas.draw()
@@ -234,12 +249,14 @@ class Image:
     # - cticks corresponds to the limits of the colorbar bar, which is always in [0...255]
     # - cticklabels corresponds to the labels set in cticks
     def set_data(self, values, a=None, r=None, style='S', symbol=None, title=None,
-        vlim=None, cticks=None, cticklabels=None):
+                 vlim=None, cticks=None, cticklabels=None):
         if a is not None and r is not None:
             self.updateQuads(a, r)
         mask = np.isfinite(values)
-        base.logger.debug('fig_dat size = {}'.format(self.fig_dat.get_size_inches() * self._dpi))
-        base.logger.debug('fig_map size = {}'.format(self.fig_map.get_size_inches() * self._dpi))
+        base.logger.debug('fig_dat size = {}'.format(
+            self.fig_dat.get_size_inches() * self._dpi))
+        base.logger.debug('fig_map size = {}'.format(
+            self.fig_map.get_size_inches() * self._dpi))
 
         # Pick a colormap, vmin, vmax, ticklabels, titlestring, etc. based on style
         if style == 'K':
@@ -274,15 +291,15 @@ class Image:
             sticks = sticklabels * 20.0
             titlestring = 'Width (m/s)'
         elif style == 'V':
-            #slim = (-32.0, +32.0)
-            #sticklabels = np.arange(-24, 25, 8)
-            #sticks = sticklabels * 128.0 / 32.0 + 128.0
+            # slim = (-32.0, +32.0)
+            # sticklabels = np.arange(-24, 25, 8)
+            # sticks = sticklabels * 128.0 / 32.0 + 128.0
             slim = (-64, +64.0)
             sticklabels = np.arange(-60, 61, 15)
             sticks = sticklabels * 128.0 / 64.0 + 128.0
             titlestring = 'Velocity (m/s)'
         elif style == 'Z' or style == 'Zc':
-            #colors = colormap.zmap()
+            # colors = colormap.zmap()
             slim = (-32.0, +96.0)
             sticklabels = np.arange(-25, 81, 15)
             sticks = sticklabels * 2.0 + 64.0
@@ -318,7 +335,7 @@ class Image:
         if cticks is None and sticks is not None:
             cticks = sticks
         if cticklabels is None and sticklabels is not None:
-            cticklabels=sticklabels
+            cticklabels = sticklabels
         # Keep a copy of the values
         self.values = np.ma.masked_where(~mask, values)
         # Paint the main area (twice if this is the first run)
@@ -330,19 +347,23 @@ class Image:
         if self.cmesh is None:
             if self.pcolorfast:
                 self.cmesh = self.cax.pcolorfast(256.0 / self.cw * np.arange(self.cw + 1), np.arange(3),
-                                                 256.0 / self.cw * np.arange(self.cw).reshape((1, self.cw)).repeat(2, axis=0) + 0.01,
+                                                 256.0 / self.cw *
+                                                 np.arange(self.cw).reshape(
+                                                     (1, self.cw)).repeat(2, axis=0) + 0.01,
                                                  vmin=0, vmax=256)
             else:
                 self.cmesh = self.cax.pcolormesh(256.0 / self.cw * np.arange(self.cw + 1), np.arange(3),
-                                                 256.0 / self.cw * np.arange(self.cw).reshape((1, self.cw)).repeat(2, axis=0) + 0.01,
+                                                 256.0 / self.cw *
+                                                 np.arange(self.cw).reshape(
+                                                     (1, self.cw)).repeat(2, axis=0) + 0.01,
                                                  vmin=0, vmax=256)
         self.dmesh.set_array(self.values.ravel())
         self.dmesh.set_clim(vlim)
         self.dmesh.set_cmap(cmap)
         self.cmesh.set_cmap(cmap)
         # Title, ticks, limits, etc.
-        #base.logger.debug(cticks)
-        #base.logger.debug(cticklabels)
+        # base.logger.debug(cticks)
+        # base.logger.debug(cticklabels)
         # if self.featureScale > 1.0:
         #     self.cax.set_xticks(cticks + self.cs)
         # else:
@@ -355,7 +376,8 @@ class Image:
             tick.set_fontproperties(self.fontproperties.tick)
         if title:
             titlestring = title
-        self.cax.set_title(titlestring, fontproperties=self.fontproperties.title, pad=8.0 * self.featureScale)
+        self.cax.set_title(
+            titlestring, fontproperties=self.fontproperties.title, pad=8.0 * self.featureScale)
         if symbol:
             self.symbol_text.set_text(symbol)
         else:
@@ -363,12 +385,16 @@ class Image:
         self.fig_dat.canvas.draw()
         self.fig_bar.canvas.draw()
         # A workaround when im_map has different size
-        target_size = [int(x) for x in self.fig_map.get_size_inches() * self._dpi]
-        raster_size = [int(x) for x in self.fig_map.canvas.renderer.get_canvas_width_height()]
+        target_size = [int(x)
+                       for x in self.fig_map.get_size_inches() * self._dpi]
+        raster_size = [
+            int(x) for x in self.fig_map.canvas.renderer.get_canvas_width_height()]
         if not target_size == raster_size:
             self.fig_map.canvas.draw()
-            updated_size = [int(x) for x in self.fig_map.canvas.renderer.get_canvas_width_height()]
-            base.logger.debug('Rasterized map axes. {} / {} -> {}'.format(target_size, raster_size, updated_size))
+            updated_size = [
+                int(x) for x in self.fig_map.canvas.renderer.get_canvas_width_height()]
+            base.logger.debug(
+                'Rasterized map axes. {} / {} -> {}'.format(target_size, raster_size, updated_size))
 
     def pixel_buffer(self):
         def blend(src, dst, dst_is_opaque=True):
@@ -383,7 +409,8 @@ class Image:
                 a_out = a_src + a_dst * (1.0 - a_src)
                 # c_out = (src[:, :, :3] * a_src + dst[:, :, :3] * a_dst * (1.0 - a_src)) / a_out
                 a_dst_x_dst = a_dst * dst[:, :, :3]
-                c_out = ((src[:, :, :3] - a_dst_x_dst) * a_src + a_dst_x_dst) / a_out
+                c_out = ((src[:, :, :3] - a_dst_x_dst)
+                         * a_src + a_dst_x_dst) / a_out
                 a_out *= 255.0
                 return np.concatenate((c_out, a_out), axis=2)
         if self.values is None:
@@ -391,9 +418,12 @@ class Image:
             values[:] = np.nan
             self.set_data(values[:-1, :-1], style='test', title='title')
         # Blend all layers
-        im_bar = np.array(self.fig_bar.canvas.renderer._renderer, dtype=np.float)
-        im_map = np.array(self.fig_map.canvas.renderer._renderer, dtype=np.float)
-        im_dat = np.array(self.fig_dat.canvas.renderer._renderer, dtype=np.float)
+        im_bar = np.array(
+            self.fig_bar.canvas.renderer._renderer, dtype=float)
+        im_map = np.array(
+            self.fig_map.canvas.renderer._renderer, dtype=float)
+        im_dat = np.array(
+            self.fig_dat.canvas.renderer._renderer, dtype=float)
         x = blend(im_map, im_dat)
         x[:self.bh, :, :] = blend(im_bar[:self.bh, :, :], x[:self.bh, :, :])
         return x
@@ -410,6 +440,7 @@ class Image:
         matplotlib.pyplot.close(self.fig_map)
         matplotlib.pyplot.close(self.fig_bar)
 
+
 def rho2ind(values):
     m3 = values > 0.93
     m2 = np.logical_and(values > 0.7, ~m3)
@@ -418,6 +449,6 @@ def rho2ind(values):
     index[m3] = values[m3] * 1000.0 - 824.0
     return np.round(index)
 
+
 def image_from_pixel_buffer(buff):
     return PIL.Image.fromarray(np.array(buff, dtype=np.uint8), 'RGB')
-

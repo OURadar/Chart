@@ -421,28 +421,28 @@ class Layer:
                 domain = shapely.geometry.box(*item.bounds)
                 if not self.viewbox.intersects(domain):
                     continue
-                if item.type == 'MultiPolygon':
+                if item.geom_type == 'MultiPolygon':
                     for subitem in item.geoms:
                         subdomain = shapely.geometry.box(*subitem.bounds)
                         if not self.viewbox.intersects(subdomain):
                             continue
                         line = project(np.array(subitem.exterior.coords) * deg2rad)
                         self.lines.append(line)
-                elif item.type == 'Polygon':
+                elif item.geom_type == 'Polygon':
                     line = project(np.array(item.exterior.coords) * deg2rad)
                     self.lines.append(line)
-                elif item.type == 'MultiLineString':
+                elif item.geom_type == 'MultiLineString':
                     for subitem in item.geoms:
                         subdomain = shapely.geometry.box(*subitem.bounds)
                         if not self.viewbox.intersects(subdomain):
                             continue
                         line = project(np.array(subitem.coords) * deg2rad)
                         self.lines.append(line)
-                elif item.type == 'LineString':
+                elif item.geom_type == 'LineString':
                     line = project(np.array(item.coords) * deg2rad)
                     self.lines.append(line)
                 else:
-                    base.logger.debug('Type {} skipped.'.format(item.type))
+                    base.logger.debug('Type {} skipped.'.format(item.geom_type))
             self.needsUpdate = False
         elif self.type == 'label':
             # Convert dataframe to local array of labels

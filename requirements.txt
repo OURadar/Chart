@@ -5,5 +5,5 @@ matplotlib
 netCDF4
 pandas
 geopandas
-Shapely --no-binary=Shapely
+Shapely
 xmltodict
