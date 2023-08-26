@@ -45,13 +45,16 @@ class Image:
         elif self.scantype == 'RHI':
             self.xx = gs
             self.yy = gh
-            xmax = self.dat.get_xlim()[1]
-            w = np.diff(self.dat.get_xlim())
-            h = np.diff(self.dat.get_ylim())
-            rhix = xmax - np.min(self.xx)
-            rhiy = rhix *h / 4 / w
-            self.dat.set_xlim((np.min(self.xx), xmax))
-            self.dat.set_ylim(( -rhiy, 3*rhiy))
+            xax = self.dat.get_xlim()
+            rhix = (xax[1] - np.min(self.xx))*9/8
+            xmin = np.min(self.xx)-rhix/8
+            if xax[0] != xmin:
+                # w = np.diff(self.dat.get_xlim())
+                # h = np.diff(self.dat.get_ylim())
+                # rhiy = rhix *h / 6 / w
+                self.dat.set_xlim((xmin, xax[1]))
+                self.map.set_xlim((xmin, xax[1]))
+                self.fig_map.canvas.draw()
         if self.dmesh:
             self.dmesh.remove()
         self.dmesh = None
@@ -101,6 +104,9 @@ class Image:
                 xmax = +maxrange + x
                 ymin = -maxrange * h / w + y
                 ymax = +maxrange * h / w + y
+            if self.scantype == 'RHI':
+                ymin = -3
+                ymax = 18
             # Figure size in inches
             figsize = np.array([w, h]) / self._dpi
             self.fig_dat = matplotlib.pyplot.figure(
