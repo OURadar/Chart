@@ -45,6 +45,13 @@ class Image:
         elif self.scantype == 'RHI':
             self.xx = gs
             self.yy = gh
+            xmax = self.dat.get_xlim()[1]
+            w = np.diff(self.dat.get_xlim())
+            h = np.diff(self.dat.get_ylim())
+            rhix = xmax - np.min(self.xx)
+            rhiy = rhix *h / 4 / w
+            self.dat.set_xlim((np.min(self.xx), xmax))
+            self.dat.set_ylim(( -rhiy, 3*rhiy))
         if self.dmesh:
             self.dmesh.remove()
         self.dmesh = None
