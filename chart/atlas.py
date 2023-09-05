@@ -559,6 +559,39 @@ class Layer:
             self.texts.append((-x, -y, s, label, self.s200, ring_color))
         return self
 
+    def initAsRHIGrids(self, radii):
+        self.type = 'line'
+        self.color = '#78dcff'
+        self.linewidth = 1.5
+        self.zorder = 40.0
+        self.needsUpdate = False
+        self.lines = []
+        for r in radii:
+            self.lines.append(np.array([[r,0], [r,100]]))
+        for r in np.arange(0,20,5):
+            self.lines.append(np.array([[-100,r], [100,r]]))
+        return self
+
+    def initAsRHILabels(self, radii):
+        self.type = 'text'
+        self.color = '#78dcff'
+        self.linewidth = 1.0
+        self.zorder = 41.0
+        self.needsUpdate = False
+        self.texts = []
+        # Ring labels at +45-deg and -45-deg and they get s500 threshold as sort value
+        # xx = radii * np.cos(0.25 * np.pi)
+        # yy = radii * np.sin(0.25 * np.pi)
+        # ss = radii * radii
+        for r in radii:
+            if r <= 1.0:
+                continue
+            label = '{:.0f} km'.format(r)
+            self.texts.append((+r, -0.5, r * r, label, self.s200, ring_color))
+            self.texts.append((-r, -0.5, r * r, label, self.s200, ring_color))
+            self.texts.append((0, +r, r * r, label, self.s200, ring_color))
+        return self
+
     def initAsTexts(self):
         self.type = 'text'
         self.color = 'varying'
@@ -576,9 +609,10 @@ class Layer:
         self.texts.append((x, y, s, label, self.s500, ring_color))
 
 class Overlay:
-    def __init__(self, origin=(-97.46381, 35.23682), featureScale=1.0):
+    def __init__(self, origin=(-97.46381, 35.23682), featureScale=1.0, scantype='PPI'):
         self.lon = 0.0
         self.lat = 0.0
+        self.scantype = scantype
         self.filenames = []
         self.ringRadii = np.concatenate(([1.0], np.arange(30.0, 250.0, 30.0)))
         # Layers are units that hold the original dataframe, the geometry ready to be drawn
@@ -593,7 +627,8 @@ class Overlay:
         self.layers[0].needsUpdate = True
         self.featureScale = featureScale
         self.setOrigin(origin)
-
+        if not ((self.scantype == 'PPI') or (self.scantype == 'RHI')):
+            raise ChartError("Unrecognized ScanType.")
     def __repr__(self):
         string = 'lon = {}\nlat = {}\ncountry = {}\n'.format(self.lon, self.lat, self.country)
         string += 'Layers:\n'
@@ -653,8 +688,12 @@ class Overlay:
         self.viewbox = makeViewBox(self.xmin, self.xmax, self.ymin, self.ymax, self.lon, self.lat)
         base.logger.debug('coord = {:.4f} {:.4f} --> domain = [{:.4f}, {:.4f}, {:.4f}, {:.4f}]'.format(
             self.lon, self.lat, self.viewbox.bounds[0], self.viewbox.bounds[1], self.viewbox.bounds[2], self.viewbox.bounds[3]))
-        self.layers[1].initAsRings(self.ringRadii)
-        self.layers[2].initAsRingLabels(self.ringRadii)
+        if self.scantype == 'PPI':
+            self.layers[1].initAsRings(self.ringRadii)
+            self.layers[2].initAsRingLabels(self.ringRadii)
+        elif self.scantype == 'RHI':
+            self.layers[1].initAsRHIGrids(self.ringRadii)
+            self.layers[2].initAsRHILabels(self.ringRadii)
         for layer in self.layers[3:]:
             layer.viewbox = self.viewbox
             layer.rotation = self.rotation
@@ -687,7 +726,11 @@ class Overlay:
         if self.layers[0].needsUpdate:
             self.prepareForAxes(ax)
         # Local function to draw a line and add it to an axis
-        for layer in self.layers:
-            if layer.type == 'polygon' or layer.type == 'line':
+        if self.scantype == 'PPI':
+            for layer in self.layers:
+                if (layer.type == 'polygon' or layer.type == 'line'):
+                    layer.draw(ax)
+            self.layers[0].draw(ax)
+        elif self.scantype == 'RHI':
+            for layer in self.layers[1:3]:
                 layer.draw(ax)
-        self.layers[0].draw(ax)

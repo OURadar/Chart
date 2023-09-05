@@ -19,29 +19,55 @@ bgColor = (0, 0, 0)
 
 
 class Image:
-    def updateQuads(self, a, r):
+    def updateQuads(self, e, a, r):
         delta_a = np.diff(a)
         delta_a[delta_a > +np.pi] -= 2.0 * np.pi
         delta_a[delta_a < -np.pi] += 2.0 * np.pi
         delta_a = delta_a.mean()
+
+        delta_e = np.diff(e)
+        delta_e[delta_e > +np.pi] -= 2.0 * np.pi
+        delta_e[delta_e < -np.pi] += 2.0 * np.pi
+        delta_e = delta_e.mean()
+
         delta_r = np.diff(r).mean()
+
         # Pad on extra element since they are the bounds
         r = np.append(r, r[-1] + delta_r)
         a = np.append(a, a[-1] + delta_a)
-        rr, aa = np.meshgrid(r, a)
-        self.xx = rr * np.sin(aa)
-        self.yy = rr * np.cos(aa)
+        e = np.append(e, e[-1] + delta_e)
+
+        tmp_dict = {'radar_elev':self.height,'range':r, 'az':a, 'theta':e}
+        gh, gx, gy, gs = radar_navigation(tmp_dict)
+        if self.scantype == 'PPI':
+            self.xx = gx
+            self.yy = gy
+        elif self.scantype == 'RHI':
+            self.xx = gs
+            self.yy = gh
+            xax = self.dat.get_xlim()
+            rhix = (xax[1] - np.min(self.xx))*9/8
+            xmin = np.min(self.xx)-rhix/8
+            if xax[0] != xmin:
+                # w = np.diff(self.dat.get_xlim())
+                # h = np.diff(self.dat.get_ylim())
+                # rhiy = rhix *h / 6 / w
+                self.dat.set_xlim((xmin, xax[1]))
+                self.map.set_xlim((xmin, xax[1]))
+                self.fig_map.canvas.draw()
         if self.dmesh:
             self.dmesh.remove()
         self.dmesh = None
 
-    def __init__(self, a=None, r=None, values=None, x=0.0, y=0.0, t=1.0, maxrange=50.0,
-                 style='Z', symbol=None, title=None, dpi=72, figsize=(1280, 720), overlay=None, pcolorfast=True):
+    def __init__(self, e=None, a=None, r=None, values=None, height=0.0, x=0.0, y=0.0, t=1.0, maxrange=50.0,
+                 style='Z', scantype = 'PPI', symbol=None, title=None, dpi=72, figsize=(1280, 720), overlay=None, pcolorfast=True):
         self._dpi = dpi
         self._figsize = figsize
         self.featureScale = t
         self.fontproperties = font.Properties(scale=t)
         self.pcolorfast = pcolorfast
+        self.scantype = scantype
+        self.height = height
 
         # Use a separate set of context properties
         context_properties = {
@@ -78,6 +104,9 @@ class Image:
                 xmax = +maxrange + x
                 ymin = -maxrange * h / w + y
                 ymax = +maxrange * h / w + y
+            if self.scantype == 'RHI':
+                ymin = -3
+                ymax = 18
             # Figure size in inches
             figsize = np.array([w, h]) / self._dpi
             self.fig_dat = matplotlib.pyplot.figure(
@@ -224,7 +253,7 @@ class Image:
                 a = np.arange(360, dtype=float) * np.pi / 180.0
             if r is None:
                 r = np.arange(1000, dtype=float) * 60.0
-            self.updateQuads(a, r)
+            self.updateQuads(e, a, r)
             self.values = None
         else:
             if a is None:
@@ -232,7 +261,7 @@ class Image:
                     values.shape[0], dtype=float) * 2.0 * np.pi / values.shape[0]
             if r is None:
                 r = np.arange(values.shape[1], dtype=float) * 0.06
-            self.updateQuads(a, r)
+            self.updateQuads(e, a, r)
             self.set_data(values, style=style, symbol=symbol, title=title)
         self.fig_bar.canvas.draw()
 
@@ -251,7 +280,7 @@ class Image:
     def set_data(self, values, a=None, r=None, style='S', symbol=None, title=None,
                  vlim=None, cticks=None, cticklabels=None):
         if a is not None and r is not None:
-            self.updateQuads(a, r)
+            self.updateQuads(e, a, r)
         mask = np.isfinite(values)
         base.logger.debug('fig_dat size = {}'.format(
             self.fig_dat.get_size_inches() * self._dpi))
@@ -452,3 +481,34 @@ def rho2ind(values):
 
 def image_from_pixel_buffer(buff):
     return PIL.Image.fromarray(np.array(buff, dtype=np.uint8), 'RGB')
+
+def radar_navigation(radar_dict):
+    # # radar_lon=radar_dict['rlon']
+    # # radar_lat=radar_dict['rlat']
+    # radar_theta=
+    # radar_az=
+    rng, theta_a = np.meshgrid(radar_dict['range'], radar_dict['az'])
+    rng, theta_e = np.meshgrid(radar_dict['range'], radar_dict['theta'])
+    # theta_e = ele * np.pi / 180.0       # elevation angle in radians.
+    # theta_a = az * np.pi / 180.0        # azimuth angle in radians.
+    Re = 6371.0 * 4.0 / 3.0    # effective radius of earth in kilometers.
+    # r = rng * 1000.0                    # distances to gates in kilometers.
+
+    z = (rng ** 2 + Re ** 2 + 2.0 * rng * Re * np.sin(theta_e)) ** 0.5 - Re
+    z = z + radar_dict['radar_elev']
+    s = Re * np.arcsin(rng * np.cos(theta_e) / (Re + z))  # arc length in m.
+    x = s * np.sin(theta_a)
+    y = s * np.cos(theta_a)
+    # Re = 6371.0 * 1000.0                # radius of earth in meters.
+    # c = np.sqrt(x*x + y*y) / Re
+    # phi_0 = radar_lat * np.pi / 180
+    # azi = np.arctan2(y, x)  # from east to north
+
+    # lat = np.arcsin(np.cos(c) * np.sin(phi_0) +
+    #                 np.sin(azi) * np.sin(c) * np.cos(phi_0)) * 180 / np.pi
+    # lon = (np.arctan2(np.cos(azi) * np.sin(c), np.cos(c) * np.cos(phi_0) -
+    #        np.sin(azi) * np.sin(c) * np.sin(phi_0)) * 180 /
+    #         np.pi + radar_lon)
+    # lon = np.fmod(lon + 180, 360) - 180
+    height = z
+    return height, x, y, s
