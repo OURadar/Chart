@@ -33,4 +33,6 @@ class RadarKit:
             title = f'{timestr} UTC  EL: {self.sweepElev:.2f}°'
         elif self.scantype =='RHI':
             title = f'{timestr} UTC  AZ: {self.sweepAz:.2f}°'
-        return chart.Image(e, a, r, self.values, style=self.symbol, title=title, figsize=(800, 600), maxrange=30.0, scantype = self.scantype,**kwargs)
+        if not('title' in kwargs):
+            kwargs.update({'title':title})
+        return chart.Image(e, a, r, self.values, style=self.symbol, figsize=(800, 600), maxrange=30.0, scantype = self.scantype,**kwargs)
