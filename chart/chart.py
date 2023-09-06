@@ -46,8 +46,8 @@ class Image:
             self.xx = gs
             self.yy = gh
             xax = self.dat.get_xlim()
-            rhix = (xax[1] - np.min(self.xx))*9/8
-            xmin = np.min(self.xx)-rhix/8
+            rhix = (xax[1] - np.min(self.xx)) * 9 / 8
+            xmin = np.min(self.xx) - rhix / 8
             if xax[0] != xmin:
                 # w = np.diff(self.dat.get_xlim())
                 # h = np.diff(self.dat.get_ylim())

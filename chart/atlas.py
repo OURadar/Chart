@@ -629,6 +629,7 @@ class Overlay:
         self.setOrigin(origin)
         if not ((self.scantype == 'PPI') or (self.scantype == 'RHI')):
             raise ChartError("Unrecognized ScanType.")
+
     def __repr__(self):
         string = 'lon = {}\nlat = {}\ncountry = {}\n'.format(self.lon, self.lat, self.country)
         string += 'Layers:\n'

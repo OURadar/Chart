@@ -20,8 +20,9 @@ class RadarKit:
             self.sweepTime = nc.getncattr('Time')
             self.scantype = nc.getncattr('ScanType')
             self.symbol = file.split('.')[-2].split('-')[-1]
+
     def genOverlay(self):
-        return atlas.Overlay((self.longitude, self.latitude),scantype = self.scantype)
+        return atlas.Overlay((self.longitude, self.latitude), scantype=self.scantype)
 
     def Image(self,**kwargs):
         r = 1.0e-3 * np.arange(self.values.shape[1]) * self.gatewidth[0]
@@ -33,4 +34,4 @@ class RadarKit:
             title = f'{timestr} UTC  EL: {self.sweepElev:.2f}°'
         elif self.scantype =='RHI':
             title = f'{timestr} UTC  AZ: {self.sweepAz:.2f}°'
-        return chart.Image(e, a, r, self.values, style=self.symbol, title=title, figsize=(800, 600), maxrange=30.0, scantype = self.scantype,**kwargs)
+        return chart.Image(e, a, r, self.values, style=self.symbol, title=title, figsize=(800, 600), maxrange=30.0, scantype=self.scantype, **kwargs)
