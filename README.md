@@ -1,16 +1,16 @@
 # ARRC Radar Datasets
 
-This repository contains the data description and a few examples of reading the data into the Python space.
+This repository contains the data description and a few examples of reading the data into Python space.
 
 ## Data Format
 
-Data are stored in a self-describubg Network Common Data Form [NetCDF].
+Data are stored in a self-describing Network Common Data Form [NetCDF].
 
 ### Arrays
 
 | Field | Type | Description |
 | --- | --- | --- |
-| Azimuth | Float | Array of azimuth angles in degrees | 
+| Azimuth | Float | Array of azimuth angles in degrees |
 | Elevation | Float | Array of elevation angles in degrees |
 | Beamwidth | Float | Array of beamwidth in degrees |
 | GateWidth | Float | Array of gatewidth in meters |
