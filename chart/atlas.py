@@ -612,7 +612,7 @@ class Overlay:
     def __init__(self, origin=(-97.46381, 35.23682), featureScale=1.0, scantype='PPI'):
         self.lon = 0.0
         self.lat = 0.0
-        self.scantype = scantype
+        self.scantype = scantype.upper()
         self.filenames = []
         self.ringRadii = np.concatenate(([1.0], np.arange(30.0, 250.0, 30.0)))
         # Layers are units that hold the original dataframe, the geometry ready to be drawn

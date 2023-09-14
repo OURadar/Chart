@@ -55,18 +55,20 @@ class Image:
                 self.dat.set_xlim((xmin, xax[1]))
                 self.map.set_xlim((xmin, xax[1]))
                 self.fig_map.canvas.draw()
+        else:
+            raise ValueError('Unknown scan type: {}'.format(self.scantype))
         if self.dmesh:
             self.dmesh.remove()
         self.dmesh = None
 
     def __init__(self, e=None, a=None, r=None, values=None, height=0.0, x=0.0, y=0.0, t=1.0, maxrange=50.0,
-                 style='Z', scantype = 'PPI', symbol=None, title=None, dpi=72, figsize=(1280, 720), overlay=None, pcolorfast=True):
+                 style='Z', scantype='PPI', symbol=None, title=None, dpi=72, figsize=(1280, 720), overlay=None, pcolorfast=True):
         self._dpi = dpi
         self._figsize = figsize
         self.featureScale = t
         self.fontproperties = font.Properties(scale=t)
         self.pcolorfast = pcolorfast
-        self.scantype = scantype
+        self.scantype = scantype.upper()
         self.height = height
 
         # Use a separate set of context properties
